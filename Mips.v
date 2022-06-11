@@ -9,17 +9,17 @@ module Mips(clk, rst, PcIn,PcNext,Instruction,WriteReg,ReadData1, ReadData2,ALUO
 	
 	wire RegDst, RegWrite, MemToReg,ALUSrc, MemRead, MemWrite, branch;
 	wire [1:0] ALUOperation;
-	wire [31:0] add_alu_out,PcOutAlu,alu_out,shift_out,alu_b,extend32;
+	wire [31:0] AddAluOut,PcOutAlu,alu_out,ShiftOut,alu_b,extend32;
 
       wire [31:0] MemReadData;
 
 	//Orginal Unit
 	sign_extend SE16TO32(Instruction[15:0],extend32);
       /* 0000000000000000000000000000000000000000 */
-      ShiftLeft2Bit ADD_ALU_B(extend32,shift_out);	
+      ShiftLeft2Bit ADD_ALU_B(extend32,ShiftOut);	
       and(branch_zero_and,branch,zero);
-	PcAdder PCADDER(pc,shift_out,add_alu_out);
-	mux_after_alu mux4_0(pc,add_alu_out,branch_zero_and,PcOutAlu);
+	PcAdder PCADDER(pc,ShiftOut,AddAluOut);
+	mux_after_alu mux4_0(pc,AddAluOut,branch_zero_and,PcOutAlu);
 
 	PrgramCounter PC(.clk(clk), .rst(rst), .pc(PcOutAlu));
 	IntructionMemory IM(.address(pc), .Instruction(Instruction));
@@ -39,8 +39,8 @@ module Mips(clk, rst, PcIn,PcNext,Instruction,WriteReg,ReadData1, ReadData2,ALUO
 
 
 	//Control Unit
-      Controller controller(.func(Instruction[5:0]), .opcode(Instruction[31:26]),.reg_dst(reg_dst),.reg_write(reg_write), .alu_src(ALUSrc),
-      .mem_to_reg(mem_toreg), .MemRead(MemRead), .MemWrite(MemWrite),.branch(branch),.ALUOperation(ALUOperation))
+      Controller controller(.func(Instruction[5:0]), .opcode(Instruction[31:26]),.RegDst(RegDst),.RegWrite(RegWrite), .ALUSrc(ALUSrc),
+      .MemToReg(MemToReg), .MemRead(MemRead), .MemWrite(MemWrite),.branch(branch),.ALUOperation(ALUOperation))
 
 
       // Data memory
