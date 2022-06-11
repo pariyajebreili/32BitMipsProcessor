@@ -4,7 +4,7 @@ module SignExtendTest();
     
     wire [31:0] Output1;
     
-    SignExtend sign_extend(Input1, Output1);
+    SignExtend UUT(Input1, Output1);
     
     initial
     begin
