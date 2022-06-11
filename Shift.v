@@ -1,10 +1,10 @@
-module ShiftLeft2Bit (ShiftIn, shift_out);
+module ShiftLeft2Bit (ShiftIn, ShiftOut);
 
   input [31:0] ShiftIn;
-  output reg [31:0] shift_out;
+  output reg [31:0] ShiftOut;
   
   always @(ShiftIn) begin
-    shift_out = ShiftIn << 2;
+    ShiftOut = ShiftIn << 2;
   end 
   
 endmodule
