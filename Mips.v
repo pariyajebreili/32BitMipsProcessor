@@ -1,7 +1,7 @@
-module Mips(clk, rst, PcIn,PcNext,Instruction,WriteReg,ReadData1, ReadData2,ALUOperation,ALUSrc,zero,ReadData,WriteDataReg);	
+module Mips(clk, rst, PcIn,PcNext,Instruction,WriteReg,ReadData1, ReadData2,ALUOperation,ALUSrc,Zero,ReadData,WriteDataReg);	
 	
 	input clk,rst;
-	output wire zero;
+	output wire Zero;
       output wire [4:0] WriteReg;
 	// output wire [3:0] alu_crtl;
       /* 0000000000000000000000000000000000000000 */
@@ -17,7 +17,7 @@ module Mips(clk, rst, PcIn,PcNext,Instruction,WriteReg,ReadData1, ReadData2,ALUO
 	sign_extend SE16TO32(Instruction[15:0],extend32);
       /* 0000000000000000000000000000000000000000 */
       ShiftLeft2Bit ADD_ALU_B(extend32,ShiftOut);	
-      and(branch_zero_and,branch,zero);
+      and(branch_zero_and,branch,Zero);
 	PcAdder PCADDER(pc,ShiftOut,AddAluOut);
 	mux_after_alu mux4_0(pc,AddAluOut,branch_zero_and,PcOutAlu);
 
@@ -35,7 +35,7 @@ module Mips(clk, rst, PcIn,PcNext,Instruction,WriteReg,ReadData1, ReadData2,ALUO
       // ALU Unit
 
 	mux_after_regfile AFT_RF(alu_src,ReadData2,extend32,alu_b);
-      ALU alu(.Operand1(ReadData1), .Operand2(alu_b), .ALUControl(ALUOperation), .ALUResult(alu_out), .Zero(zero));
+      ALU alu(.Operand1(ReadData1), .Operand2(alu_b), .ALUControl(ALUOperation), .ALUResult(alu_out), .Zero(Zero));
 
 
 	//Control Unit
@@ -56,10 +56,10 @@ endmodule
 module testbech();
 
       reg clk,rst;
-      wire PcIn,PcNext,Instruction,WriteReg,ReadData1, ReadData2,ALUOperation,ALUSrc,zero,ReadData,WriteDataReg
+      wire PcIn,PcNext,Instruction,WriteReg,ReadData1, ReadData2,ALUOperation,ALUSrc,Zero,ReadData,WriteDataReg
       
 
-      Mips UUT(clk, rst, PcIn,PcNext,Instruction,WriteReg,ReadData1, ReadData2,ALUOperation,ALUSrc,zero,ReadData,WriteDataReg)
+      Mips UUT(clk, rst, PcIn,PcNext,Instruction,WriteReg,ReadData1, ReadData2,ALUOperation,ALUSrc,Zero,ReadData,WriteDataReg)
 
       initial begin
             rst = 1;
