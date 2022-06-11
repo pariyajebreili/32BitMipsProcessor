@@ -1,4 +1,4 @@
-module shift_left_2bit (ShiftIn, shift_out);
+module ShiftLeft2Bit (ShiftIn, shift_out);
 
   input [31:0] ShiftIn;
   output reg [31:0] shift_out;
