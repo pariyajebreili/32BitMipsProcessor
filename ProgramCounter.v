@@ -1,15 +1,15 @@
-module prgram_counter(clk, rst, pc_in, pc_next);
+module PrgramCounter(clk, rst, PcIn, PcNext);
 
 	input clk, rst;
-	input [31:0] pc_in;
+	input [31:0] PcIn;
 	
-	output reg [31:0] pc_next;
+	output reg [31:0] PcNext;
 	
 	always @(posedge clk) 
       begin
 		if (rst == 1) 
-		    pc_next <= 0;
+		    PcNext = 0;
 		else 
-		    pc_next <= pc_in + 4; 
+		    PcNext = PcIn + 4; 
 	end
 endmodule

@@ -5,10 +5,10 @@
 module ControllerTest();
 
       reg [5:0] opcode, func;
-      wire reg_dst,reg_write, alu_src,mem_to_reg, mem_read, mem_write,branch;
+      wire RegDst,RegWrite, ALUSrc,MemToReg, MemRead, MemWrite,branch;
       wire [1:0] alu_op;
 
-      control_unit controller(func, opcode,reg_dst,reg_write, alu_src,mem_to_reg, mem_read, mem_write,branch,alu_op);
+      Controller controller(func, opcode,RegDst,RegWrite, ALUSrc,MemToReg, MemRead, MemWrite,branch,alu_op);
 
       initial
       begin

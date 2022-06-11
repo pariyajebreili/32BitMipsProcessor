@@ -1,13 +1,13 @@
 
-module intruction_memory(address, inst);
+module IntructionMemory(Address, Instruction);
 
-	input [31:0] address;
+	input [31:0] Address;
 
-	output reg [31:0]	inst;
+	output reg [31:0] Instruction;
 	
 	reg [31:0] IMEM [0:127];
 
-	always @(address) inst = IMEM[address];
+	always @(Address) Instruction = IMEM[Address];
 
 
     initial

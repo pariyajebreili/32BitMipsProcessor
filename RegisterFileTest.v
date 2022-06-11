@@ -9,7 +9,7 @@ module RegisterFileTest();
     wire [31:0] ReadData1;
     wire [31:0] ReadData2;
 
-    register_file RegFile(ReadRegister1, ReadRegister2, WriteData, WriteReg,
+    RegisterFile RegFile(ReadRegister1, ReadRegister2, WriteData, WriteReg,
                          RegWriteActive, ReadData1, ReadData2);
 
     initial begin

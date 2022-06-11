@@ -8,54 +8,54 @@
 `define BEQ    6'b000100
 `define RTYPE  6'b000000
 
-module Controller(func, opcode,reg_dst,reg_write, alu_src,mem_to_reg, mem_read, mem_write,branch,alu_op);
+module Controller(func, opcode,RegDst,RegWrite, ALUSrc,MemToReg, MemRead, MemWrite,branch,ALUOperation);
 	
 	input [5:0] opcode, func;
-	output reg reg_dst,reg_write, alu_src,mem_to_reg, mem_read, mem_write,branch;
-	output reg [1:0] alu_op;
+	output reg RegDst,RegWrite, ALUSrc,MemToReg, MemRead, MemWrite,branch;
+	output reg [1:0] ALUOperation;
  
 				  
 	
 	always @(*) begin
 
-		reg_dst 	= 0;
-		alu_src 	= 0;
-		mem_to_reg	= 0;
-		reg_write	= 0;
-		mem_read	= 0;
-		mem_write	= 0;
+		RegDst 	= 0;
+		ALUSrc 	= 0;
+		MemToReg	= 0;
+		RegWrite	= 0;
+		MemRead	= 0;
+		MemWrite	= 0;
 		branch	= 0;
 
 		//select oprand
 		case(opcode)	
 			`LW: begin
-				alu_src 	= 1;
-				reg_write	= 1;
-				mem_read	= 1;
-                        mem_to_reg	= 1;
-				alu_op	= 2'b10;/*0*/
+				ALUSrc 	= 1;
+				RegWrite	= 1;
+				MemRead	= 1;
+                        MemToReg	= 1;
+				ALUOperation	= 2'b10;/*0*/
 			end
 			`SW: begin
-                        reg_dst     = 1'bx;
-				alu_src 	= 1;
-                        mem_to_reg   = 1'bx;
-				mem_write	= 1;
-				alu_op	= 2'b10;/*0*/
+                        RegDst     = 1'bx;
+				ALUSrc 	= 1;
+                        MemToReg   = 1'bx;
+				MemWrite	= 1;
+				ALUOperation	= 2'b10;/*0*/
 			end
 			`BEQ: begin
-                        reg_dst     = 1'bx;
-                        mem_to_reg   = 1'bx;
+                        RegDst     = 1'bx;
+                        MemToReg   = 1'bx;
 				branch	= 1;
-				alu_op	= 2'b11;/*1*/
+				ALUOperation	= 2'b11;/*1*/
 			end
 			`RTYPE: begin
-				reg_dst 	= 1;
-				reg_write	= 1;
+				RegDst 	= 1;
+				RegWrite	= 1;
                         case(func)
-                              `FUNC_ADD : alu_op	= 2'b10;
-                              `FUNC_SUB : alu_op	= 2'b11;
-                              `FUNC_AND : alu_op	= 2'b00;
-                              `FUNC_OR :  alu_op      = 2'b01;
+                              `FUNC_ADD : ALUOperation = 2'b10;
+                              `FUNC_SUB : ALUOperation = 2'b11;
+                              `FUNC_AND : ALUOperation = 2'b00;
+                              `FUNC_OR :  ALUOperation = 2'b01;
                         endcase
 			end
 		endcase

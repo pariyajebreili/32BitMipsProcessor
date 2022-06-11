@@ -6,7 +6,7 @@ module DataMemoryTest();
     
     wire [31:0] ReadData;
     
-    data_memory Mem(Address, r_wbar, WriteData, ReadData);
+    DataMemory Mem(Address, r_wbar, WriteData, ReadData);
     
     initial
     begin

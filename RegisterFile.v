@@ -1,5 +1,4 @@
-module register_file(ReadRegister1, ReadRegister2, WriteData, WriteReg,
- RegWriteActive, ReadData1, ReadData2);
+module RegisterFile(ReadRegister1, ReadRegister2, WriteData, WriteReg,RegWriteActive, ReadData1, ReadData2);
 
     // WriteData: the data to write
     // WriteReg: number of register to write
