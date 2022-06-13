@@ -1,15 +1,37 @@
-module PrgramCounter(clk, rst, PcIn, PcNext);
+// module PrgramCounter(clk, rst, PcIn, PcNext);
+
+// 	input clk, rst;
+// 	input [31:0] PcIn;
+	
+// 	output reg [31:0] PcNext;
+	
+// 	always @(posedge clk) 
+//       begin
+// 		if (rst == 1) 
+// 		    PcNext = 0;
+// 		else 
+// 		    PcNext = PcIn + 4; 
+// 	end
+// endmodule
+
+
+module PrgramCounter(clk, rst, pc);
 
 	input clk, rst;
-	input [31:0] PcIn;
+
+    inout [31:0] pc;
+   
+    reg [31:0] PC_reg;
 	
-	output reg [31:0] PcNext;
-	
-	always @(posedge clk) 
-      begin
+	always @(posedge clk or rst) begin
 		if (rst == 1) 
-		    PcNext = 0;
+		    PC_reg <= 0;
 		else 
-		    PcNext = PcIn + 4; 
+		    PC_reg <= pc + 1; 
 	end
+
+
+    assign pc = PC_reg;
+
+    
 endmodule
