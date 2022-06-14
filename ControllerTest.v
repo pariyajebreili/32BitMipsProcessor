@@ -1,5 +1,5 @@
 `timescale 1ns/1ns
-`include "Controller.v"
+//`include "Controller.v"
 
 
 module ControllerTest();

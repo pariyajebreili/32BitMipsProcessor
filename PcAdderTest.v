@@ -1,5 +1,5 @@
 `timescale 1ns/1ns
-`include "PcAdder.v"
+//`include "PcAdder.v"
 
 module PcAdderTest();
       reg [31:0] PcNext;

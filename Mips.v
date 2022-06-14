@@ -1,11 +1,13 @@
 /* Signals should be added to output? */
-module Mips(clk, rst, pc ,Instruction, ReadData1, ReadData2,  WriteDataReg,
+module Mips(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDataReg,
       WriteReg, Zero, branch, RegDst, RegWrite, MemToReg, ALUSrc, MemRead, MemWrite, ALUOperation);
 	
 	input clk,rst;
 	
       output wire [4:0] WriteReg;
-	output wire [31:0] pc,Instruction,ReadData1, ReadData2,WriteDataReg;
+	output wire [31:0] Instruction,ReadData1, ReadData2,WriteDataReg;
+	output wire [31:0] pc_in, PCNext;
+	
 	
 	output wire RegDst, RegWrite, MemToReg,ALUSrc,
 	Zero, MemRead, MemWrite, branch;
@@ -14,25 +16,29 @@ module Mips(clk, rst, pc ,Instruction, ReadData1, ReadData2,  WriteDataReg,
       wire branch_zero_and;
       wire [31:0] MemReadData;
 
+	//ProgramCounter PC(.clk(clk), .rst(rst), .pc(pc));
+	ProgramCounter PC(.clk(clk), .rst(rst), .PcIn(pc_in), .PcNext(pc_in));
+   
+
+
 	//Orginal Unit
 	SignExtend SE16TO32(Instruction[15:0],extend32);
       /* 0000000000000000000000000000000000000000 */
       /* maybe it's not needed. */
-      ShiftLeft2Bit ADD_ALU_B(extend32,ShiftOut);	
+      // ShiftLeft2Bit ADD_ALU_B(extend32,ShiftOut);	
 
       and(branch_zero_and, branch, Zero);
 
       /* 0000000000000000000000000000000000000000 */
       /*  multiplying by 4 is not implemented in this module. maybe it's not needed.  */
-	PcAdder PCADDER(.PcNext(pc), .ShiftOut(ShiftOut),.AddAluOut(AddAluOut));
+	PcAdder PCADDER(.PcNext(PCNext), .ShiftOut(extend32),.AddAluOut(AddAluOut));
 
-	mux_2_to_1_32bits mux_after_pc_adder(.Input0(pc), .Input1(AddAluOut),
-       .Selector(branch_zero_and), .Output1(pc));
+	mux_2_to_1_32bits mux_after_pc_adder(.Input0(PCNext), .Input1(AddAluOut),
+       .Selector(branch_zero_and), .Output1(PCNext));
 
-	PrgramCounter PC(.clk(clk), .rst(rst), .pc(pc));
 
       
-	IntructionMemory IM(.address(pc), .Instruction(Instruction));
+	IntructionMemory IM(.Address(pc_in), .Instruction(Instruction));
 
       
 	mux_2_to_1_5bits mux_before_regfile(.Input0(Instruction[20:16]), .Input1(Instruction[15:11]),
@@ -54,7 +60,7 @@ module Mips(clk, rst, pc ,Instruction, ReadData1, ReadData2,  WriteDataReg,
 
 
       // Data memory
-      DataMemory DM(.addr(alu_out), .rbar_w(mem_write),
+      DataMemory DM(.Address(alu_out), .rbar_w(MemWrite),
       .WriteData(ReadData2), .ReadData(MemReadData));
 	mux_2_to_1_32bits mux_affter_memory(.Input0(MemReadData), .Input1(alu_out), .Selector(MemToReg), .Output1(WriteDataReg));
 
@@ -66,17 +72,30 @@ endmodule
 module testbech();
 
       reg clk,rst;
-      wire pc,Instruction,WriteReg,ReadData1, ReadData2,
-      ALUOperation,ALUSrc,Zero,ReadData,WriteDataReg;
-      
+      wire ALUSrc,Zero;
+      wire [4:0] WriteReg;
+      wire [1:0] ALUOperation;
+      wire [31:0] Instruction, pc_in, PCNext, ReadData1, ReadData2, WriteDataReg;
+
 /*
       Mips UUT(clk, rst, pc,Instruction,WriteReg,ReadData1, ReadData2,
       ALUOperation,ALUSrc,Zero,ReadData,WriteDataReg);
-*/
+*/   
+      integer i;
+   
+      Mips MIPS(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDataReg,
+      WriteReg, Zero, branch, RegDst, RegWrite, MemToReg, ALUSrc, MemRead, MemWrite, ALUOperation);
+      
+      
+     /* 
       initial begin
             rst = 1;
-            clk = 0;
+            #10
             rst = 0;
+            #10
+            clk = 0;
+
+            
             #100;
             clk = 1;
             #100;
@@ -88,6 +107,30 @@ module testbech();
             #100;
             clk = 1;
             #100;
+            
+            for(i = 0; i < 10; i = i + 1)
+            begin
+               clk = ~clk;
+               #20;
+            end
       end
+*/
+
+    initial begin
+   
+
+       clk = 0;
+       rst = 0;
+       clk = 1;
+
+       rst = 1;
+       #10
+       rst = 0;
+       for(i = 0; i <= 20; i = i + 1)
+       begin
+          #10
+          clk = ~clk;
+       end
+   end
 
 endmodule
