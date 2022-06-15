@@ -1,22 +1,23 @@
 /* Signals should be added to output? */
 module Mips(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDataReg,
-      WriteReg, Zero, branch, RegDst, RegWrite, MemToReg, ALUSrc, MemRead, MemWrite, ALUOperation);
+      WriteReg, Zero, branch, RegDst, RegWrite, MemToReg, ALUSrc, MemRead, MemWrite, ALUOperation, MemReadData, alu_out);
 	
 	input clk,rst;
 	
       output wire [4:0] WriteReg;
-	output wire [31:0] Instruction,ReadData1, ReadData2,WriteDataReg;
+	output wire [31:0] Instruction,ReadData1, ReadData2,WriteDataReg, alu_out, MemReadData;
 	output wire [31:0] pc_in, PCNext;
 	
 	
 	output wire RegDst, RegWrite, MemToReg,ALUSrc,
 	Zero, MemRead, MemWrite, branch;
 	output wire [1:0] ALUOperation;
-	wire [31:0] AddAluOut,alu_out,ShiftOut,alu_b,extend32;
-      wire branch_zero_and;
-      wire [31:0] MemReadData;
+	wire [31:0] AddAluOut,ShiftOut,alu_b,extend32;
 
-	ProgramCounter PC(.clk(clk), .rst(rst), .PcIn(PCNext), .PcNext(pc_in));
+      wire branch_zero_and;
+      // wire [31:0] MemReadData;
+
+	ProgramCounter PC(.clk(clk), .rst(rst), .PcIn(pc_in), .PcNext(pc_in));
    
 
 
@@ -30,7 +31,7 @@ module Mips(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDa
       /* changed PCNext to pc_in.... */
       /* why we can't change output to pc_in? */
 	mux_2_to_1_32bits mux_after_pc_adder(.Input0(pc_in), .Input1(AddAluOut),
-       .Selector(branch_zero_and), .Output1(pc_in));
+       .Selector(branch_zero_and), .Output1(PCNext));
 
 
       /* pc_in or PCNext? obviously pc_in but why it's not working.................. */
@@ -71,12 +72,12 @@ module testbech();
       wire ALUSrc,Zero;
       wire [4:0] WriteReg;
       wire [1:0] ALUOperation;
-      wire [31:0] Instruction, pc_in, PCNext, ReadData1, ReadData2, WriteDataReg;
+      wire [31:0] Instruction, pc_in, PCNext, ReadData1, ReadData2, WriteDataReg, MemReadData, alu_out;
  
       integer i;
    
       Mips MIPS(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDataReg,
-      WriteReg, Zero, branch, RegDst, RegWrite, MemToReg, ALUSrc, MemRead, MemWrite, ALUOperation);
+      WriteReg, Zero, branch, RegDst, RegWrite, MemToReg, ALUSrc, MemRead, MemWrite, ALUOperation, MemReadData, alu_out);
       
  
     initial begin
