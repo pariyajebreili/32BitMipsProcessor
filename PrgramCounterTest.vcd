@@ -1,0 +1,46 @@
+$date
+	Tue Jun 14 19:48:07 2022
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ns
+$end
+$scope module PrgramCounterTest $end
+$var wire 32 ! PcNext [31:0] $end
+$var reg 32 " PcIn [31:0] $end
+$var reg 1 # clk $end
+$var reg 1 $ rst $end
+$scope module UUT $end
+$var wire 32 % PcIn [31:0] $end
+$var wire 1 # clk $end
+$var wire 1 $ rst $end
+$var reg 32 & PcNext [31:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+bx &
+b1 %
+1$
+0#
+b1 "
+bx !
+$end
+#10
+0$
+#20
+b10 !
+b10 &
+1#
+#30
+0#
+#40
+1$
+#50
+0$
+#60
+1#
+#70

@@ -1,9 +1,9 @@
-module RegisterFile(ReadRegister1, ReadRegister2, WriteData, WriteReg,RegWriteActive, ReadData1, ReadData2);
+module RegisterFile(clk,ReadRegister1, ReadRegister2, WriteData, WriteReg,RegWriteActive, ReadData1, ReadData2);
 
     // WriteData: the data to write
     // WriteReg: number of register to write
     // RegWriteActive: control signal for writing register => 1: write - 0: not write
-
+    input clk;
     input [4:0] ReadRegister1;
     input [4:0] ReadRegister2;
     input [31:0] WriteData;

@@ -1,0 +1,102 @@
+$date
+	Tue Jun 14 18:14:57 2022
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ns
+$end
+$scope module ControllerTest $end
+$var wire 1 ! branch $end
+$var wire 2 " alu_op [1:0] $end
+$var wire 1 # RegWrite $end
+$var wire 1 $ RegDst $end
+$var wire 1 % MemWrite $end
+$var wire 1 & MemToReg $end
+$var wire 1 ' MemRead $end
+$var wire 1 ( ALUSrc $end
+$var reg 6 ) func [5:0] $end
+$var reg 6 * opcode [5:0] $end
+$scope module controller $end
+$var wire 6 + func [5:0] $end
+$var wire 6 , opcode [5:0] $end
+$var reg 2 - ALUOperation [1:0] $end
+$var reg 1 ( ALUSrc $end
+$var reg 1 ' MemRead $end
+$var reg 1 & MemToReg $end
+$var reg 1 % MemWrite $end
+$var reg 1 $ RegDst $end
+$var reg 1 # RegWrite $end
+$var reg 1 ! branch $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+b10 -
+b0 ,
+b100000 +
+b0 *
+b100000 )
+0(
+0'
+0&
+0%
+1$
+1#
+b10 "
+0!
+$end
+#20
+b11 "
+b11 -
+1#
+1$
+b100010 )
+b100010 +
+#40
+b0 "
+b0 -
+1#
+1$
+b100100 )
+b100100 +
+#60
+b1 "
+b1 -
+1#
+1$
+b100101 )
+b100101 +
+#80
+b10 "
+b10 -
+1&
+1'
+1(
+1#
+0$
+bx )
+bx +
+b100011 *
+b100011 ,
+#100
+1%
+x$
+0'
+0#
+x&
+1(
+b101011 *
+b101011 ,
+#120
+b11 "
+b11 -
+1!
+0%
+x&
+0(
+x$
+b100 *
+b100 ,

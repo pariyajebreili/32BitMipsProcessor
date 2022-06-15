@@ -18,7 +18,7 @@ module Mips(clk, rst, pc ,Instruction, ReadData1, ReadData2,  WriteDataReg,
 	SignExtend SE16TO32(Instruction[15:0],extend32);
       /* 0000000000000000000000000000000000000000 */
       /* maybe it's not needed. */
-      ShiftLeft2Bit ADD_ALU_B(extend32,ShiftOut);	
+      // ShiftLeft2Bit ADD_ALU_B(extend32,ShiftOut);	
 
       and(branch_zero_and, branch, Zero);
 
