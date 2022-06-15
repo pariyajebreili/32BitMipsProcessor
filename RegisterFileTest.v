@@ -37,5 +37,19 @@ module RegisterFileTest();
         // Reading the written data
         #20
         ReadRegister1 = 5'b10000;
+        
+        #20
+        ReadRegister1 = 5'b00001;        
+                #20
+        ReadRegister1 = 5'b00010;        
+                #20
+        ReadRegister1 = 5'b00011;        
+                #20
+        ReadRegister1 = 5'b01001;        
+                #20
+        ReadRegister1 = 5'b00101;        
+                #20
+        ReadRegister1 = 5'b01010;        
+        
     end
 endmodule

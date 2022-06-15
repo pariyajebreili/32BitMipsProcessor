@@ -16,28 +16,24 @@ module Mips(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDa
       wire branch_zero_and;
       wire [31:0] MemReadData;
 
-	//ProgramCounter PC(.clk(clk), .rst(rst), .pc(pc));
-	ProgramCounter PC(.clk(clk), .rst(rst), .PcIn(pc_in), .PcNext(pc_in));
+	ProgramCounter PC(.clk(clk), .rst(rst), .PcIn(PCNext), .PcNext(pc_in));
    
 
 
 	//Orginal Unit
 	SignExtend SE16TO32(Instruction[15:0],extend32);
-      /* 0000000000000000000000000000000000000000 */
-      /* maybe it's not needed. */
-      // ShiftLeft2Bit ADD_ALU_B(extend32,ShiftOut);	
+
 
       and(branch_zero_and, branch, Zero);
+      /* changed PCNext to pc_in.... */
+	PcAdder PCADDER(.PcNext(pc_in), .ShiftOut(extend32),.AddAluOut(AddAluOut));
+      /* changed PCNext to pc_in.... */
+      /* why we can't change output to pc_in? */
+	mux_2_to_1_32bits mux_after_pc_adder(.Input0(pc_in), .Input1(AddAluOut),
+       .Selector(branch_zero_and), .Output1(pc_in));
 
-      /* 0000000000000000000000000000000000000000 */
-      /*  multiplying by 4 is not implemented in this module. maybe it's not needed.  */
-	PcAdder PCADDER(.PcNext(PCNext), .ShiftOut(extend32),.AddAluOut(AddAluOut));
 
-	mux_2_to_1_32bits mux_after_pc_adder(.Input0(PCNext), .Input1(AddAluOut),
-       .Selector(branch_zero_and), .Output1(PCNext));
-
-
-      
+      /* pc_in or PCNext? obviously pc_in but why it's not working.................. */
 	IntructionMemory IM(.Address(pc_in), .Instruction(Instruction));
 
       
@@ -62,7 +58,7 @@ module Mips(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDa
       // Data memory
       DataMemory DM(.Address(alu_out), .rbar_w(MemWrite),
       .WriteData(ReadData2), .ReadData(MemReadData));
-	mux_2_to_1_32bits mux_affter_memory(.Input0(MemReadData), .Input1(alu_out), .Selector(MemToReg), .Output1(WriteDataReg));
+	mux_2_to_1_32bits mux_affter_memory(.Input0(alu_out), .Input1(MemReadData), .Selector(MemToReg), .Output1(WriteDataReg));
 
 	
 
@@ -76,46 +72,13 @@ module testbech();
       wire [4:0] WriteReg;
       wire [1:0] ALUOperation;
       wire [31:0] Instruction, pc_in, PCNext, ReadData1, ReadData2, WriteDataReg;
-
-/*
-      Mips UUT(clk, rst, pc,Instruction,WriteReg,ReadData1, ReadData2,
-      ALUOperation,ALUSrc,Zero,ReadData,WriteDataReg);
-*/   
+ 
       integer i;
    
       Mips MIPS(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDataReg,
       WriteReg, Zero, branch, RegDst, RegWrite, MemToReg, ALUSrc, MemRead, MemWrite, ALUOperation);
       
-      
-     /* 
-      initial begin
-            rst = 1;
-            #10
-            rst = 0;
-            #10
-            clk = 0;
-
-            
-            #100;
-            clk = 1;
-            #100;
-            clk = 0;
-            #100;
-            rst = 1;
-            #100;
-            rst = 0;
-            #100;
-            clk = 1;
-            #100;
-            
-            for(i = 0; i < 10; i = i + 1)
-            begin
-               clk = ~clk;
-               #20;
-            end
-      end
-*/
-
+ 
     initial begin
    
 

@@ -14,6 +14,7 @@ module ALU(Operand1, Operand2, ALUControl, ALUResult, Zero);
     
     always @ (Operand1 or Operand2 or ALUControl)
     begin
+      Zero = 0;
        case (ALUControl)
            `AND : ALUResult = (Operand1 & Operand2);
            `OR  : ALUResult = (Operand1 | Operand2);
