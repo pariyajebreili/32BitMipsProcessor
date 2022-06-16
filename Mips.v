@@ -1,8 +1,8 @@
-module MipsCPU(CLK, rst, PCIn,PCNext,Instruction,write_reg,ReadData1, ReadData2,ALUControl,Zero,read_data,write_data_reg);	
+module MipsCPU(CLK, rst, PCIn,PCNext,Instruction,WriteReg,ReadData1, ReadData2,ALUControl,Zero,read_data,write_data_reg);	
 	
 	input CLK,rst;
 	output wire Zero;
-      output wire [4:0] write_reg;
+      output wire [4:0] WriteReg;
 	output wire [3:0] ALUControl;
 	output wire [31:0] PCNext,PCIn,Instruction,ReadData1, ReadData2,write_data_reg,read_data;
 	
@@ -13,7 +13,7 @@ module MipsCPU(CLK, rst, PCIn,PCNext,Instruction,write_reg,ReadData1, ReadData2,
 	//Orginal Unit
 	prgram_counter PC(CLK,rst,PCIn,PCNext);
 	intruction_memory IM(CLK,PCIn,Instruction);
-	reg_file RF(CLK,reg_write,Instruction[25:21],Instruction[20:16],write_reg,write_data_reg,ReadData1,ReadData2);
+	reg_file RF(CLK,reg_write,Instruction[25:21],Instruction[20:16],WriteReg,write_data_reg,ReadData1,ReadData2);
 	data_memory  DM(CLK,alu_out,mem_write,mem_read,ReadData2,read_data);
 
 	//Control Unit
@@ -21,7 +21,7 @@ module MipsCPU(CLK, rst, PCIn,PCNext,Instruction,write_reg,ReadData1, ReadData2,
 	alu_control_unit ALUCTRL(alu_op,Instruction[5:0],ALUControl);
 
 	//Contivites Unit
-	mux_before_regfile BEF_RF(Instruction[20:16],Instruction[15:11],reg_dst,write_reg);
+	mux_before_regfile BEF_RF(Instruction[20:16],Instruction[15:11],reg_dst,WriteReg);
 	mux_affter_regfile AFT_RF(alu_src,ReadData2,extend32,alu_b);
 	sign_extend SE16TO32(Instruction[15:0],extend32);
 	shift_left_2bit ADD_ALU_B(extend32,shift_out);	
@@ -92,68 +92,45 @@ module control_unit(opcode,reg_dst,reg_write, alu_src,mem_toreg, mem_read, mem_w
 	output reg reg_dst,reg_write, alu_src,j,mem_toreg, mem_read, mem_write,branch,branch_ne;
 	output reg [3:0] alu_op;
  
-   wire [5:0] LW = 6'b100011/*35*/, SW  = 6'b101011/*43*/, ADDI = 6'b001000/*8*/,
-              SUBI  = 6'b100111/*42*/, ANDI  = 6'b101111/*50*/, ORI  = 6'b110010/*8*/,
-	 	  BEQ   = 6'b000100/*4*/, J = 6'b000010/*2*/,RTYPE = 6'b000000/*0*/;
+   wire [5:0] LW = 6'b100011/*35*/, SW  = 6'b101011/*43*/,BEQ   = 6'b000100/*4*/, J = 6'b000010/*2*/,RTYPE = 6'b000000/*0*/;
 				  
 	
 	always @(*) begin
 		//reset...
-		reg_dst 		<= 0;
-		alu_src 		<= 0;
-		mem_toreg	<= 0;
-		reg_write	<= 0;
-		mem_read		<= 0;
-		mem_write	<= 0;
-		branch		<= 0;
-		j		      <= 0;
+		reg_dst = 0;
+		alu_src = 0;
+		mem_toreg = 0;
+		reg_write = 0;
+		mem_read = 0;
+		mem_write = 0;
+		branch = 0;
+		j = 0;
 
 		//select oprand
 		case(opcode)	
 			LW: begin
-				alu_src 		<= 1;
-				reg_write	<= 1;
-				mem_read		<= 1;
-				mem_write	<= 1;
-				alu_op		<= 4'b0000;/*0*/
+				alu_src = 1;
+				reg_write = 1;
+				mem_read = 1;
+				mem_write = 1;
+				alu_op = 4'b0000;//0
 			end
 			SW: begin
-				alu_src 		<= 1;
-				mem_write	<= 1;
-				alu_op		<= 4'b0000;/*0*/
+				alu_src = 1;
+				mem_write = 1;
+				alu_op = 4'b0000;//0
 			end
 			BEQ: begin
-				branch		<= 1;
-				alu_op		<= 4'b0001;/*1*/
-			end
-			ADDI: begin
-				alu_src 		<= 1;
-				reg_write	<= 1;
-				alu_op		<= 4'b0010;/*2*/
-			end
-			SUBI: begin
-				alu_src 		<= 1;
-				reg_write	<= 1;
-				alu_op		<= 4'b0011;/*3*/
-			end
-			ANDI: begin
-				alu_src 		<= 1;
-				reg_write	<= 1;
-				alu_op		<= 4'b0101;/*5*/
-			end
-			ORI: begin
-				alu_src 		<= 1;
-				reg_write	<= 1;
-				alu_op		<= 4'b0111;/*7*/
+				branch = 1;
+				alu_op = 4'b0001;/*1*/
 			end
 			J: begin
-				j              <= 1;
-				// alu_op			<= 4'bxxxx;
+				j  = 1;
 			end
 			RTYPE: begin
-				reg_dst 		<= 1;
-				reg_write		<= 1;
-				alu_op		<= 4'b1111;
+				reg_dst = 1;
+				reg_write = 1;
+				alu_op = 4'b1111;
 			end
 		endcase
 	end
@@ -166,25 +143,25 @@ module  data_memory (CLK, addr,mem_write, mem_read,write_data,read_data);
 	input wire [31:0] addr,write_data;
 	output reg [31:0] read_data;
 
-   reg [31:0] Mem[0:255];
+      reg [31:0] Mem[0:255];
 
-   integer i;
+      integer i;
 
-   initial begin
+      initial begin
 		read_data <= 0;
 		for (i = 0; i < 256; i = i + 1) begin
 			Mem[i] = i;
 		end
-   end
+      end
 
-   always @(posedge CLK) begin
+      always @(posedge CLK) begin
 		if (mem_write == 1) begin
-			Mem[addr] <= write_data;
+			Mem[addr] = write_data;
 		end
 		if (mem_read == 1) begin
-			read_data <= Mem[addr];
+			read_data = Mem[addr];
 		end
-   end
+      end
 
 endmodule
 
@@ -214,8 +191,8 @@ module JCall(pc_out_alu,ReadData1,j,PCIn);
 	output reg [31:0] PCIn;
 	
 	always @(*) begin
-		if   (j) begin PCIn <= ReadData1; end
-		else     begin PCIn <= pc_out_alu;     end
+		if   (j) begin PCIn = ReadData1; end
+		else     begin PCIn = pc_out_alu;     end
 	end
 endmodule
 
@@ -244,8 +221,8 @@ module mux_affter_memory (read_data, alu_out, mem_toreg, write_data_reg);
 	
 	always @(*) begin
 		case (mem_toreg)
-			0: write_data_reg <= alu_out ;
-			1: write_data_reg <= read_data;
+			0: write_data_reg = alu_out ;
+			1: write_data_reg = read_data;
 		endcase
 	end
 endmodule
@@ -260,8 +237,8 @@ module mux_affter_regfile (alu_src, ReadData2, extend32, alu_b);
 	
 	always @(alu_src, ReadData2, extend32) begin
 		case (alu_src)
-			0: alu_b <= ReadData2 ;
-			1: alu_b <= extend32;
+			0: alu_b = ReadData2 ;
+			1: alu_b = extend32;
 		endcase
 	end
 endmodule
@@ -275,8 +252,8 @@ module mux_before_regfile(rt, rd, reg_dst, write_reg);
 	output reg [4:0] write_reg;
 
 	always @ (reg_dst, rt, rd) begin
-		if(reg_dst == 1) begin  write_reg <= rd; end
-		else  begin write_reg <= rt; end
+		if(reg_dst == 1) begin  write_reg = rd; end
+		else  begin write_reg = rt; end
 	end
 
 endmodule
@@ -289,7 +266,7 @@ module pc_adder(PCNext, shift_out, add_alu_out);
 	output reg [31:0] add_alu_out;
 
 	always @(*) begin
-		add_alu_out <= PCNext + shift_out;
+		add_alu_out = PCNext + shift_out;
 	end
 endmodule
 
@@ -302,9 +279,9 @@ module prgram_counter(CLK, rst, PCIn, PCNext);
 	
 	always @(posedge CLK) begin
 		if (rst == 1) 
-		    PCNext <= 0;
+		    PCNext = 0;
 		else 
-		    PCNext <= PCIn + 4; 
+		    PCNext = PCIn + 4; 
 	end
 	
 endmodule
@@ -321,19 +298,17 @@ module reg_file(CLK, reg_write, read_reg1, read_reg2, write_reg, write_data, Rea
 	reg [31:0] reg_mem [0:31];
 
 	initial begin
-		reg_mem[0] <= 0;
-		reg_mem[1] <= 4;
-		reg_mem[2] <= 8;
-            reg_mem[3] <= 12; 
-            reg_mem[4] <= 16;
-            reg_mem[5] <= 16;
-            reg_mem[6] <= 16;
-            reg_mem[7] <= 16;
-            reg_mem[8] <= 60;
-            reg_mem[9] <= 13;
-            reg_mem[10] <= 13;
-            reg_mem[14] <= 1;
-		reg_mem[31] <=16;//lable Exit
+		reg_mem[0] = 0;
+		reg_mem[1] = 4;
+		reg_mem[2] = 8;
+            reg_mem[3] = 12; 
+            reg_mem[4] = 16;
+            reg_mem[5] = 16;
+            reg_mem[6] = 16;
+            reg_mem[7] = 16;
+            reg_mem[8] = 60;
+            reg_mem[9] = 13;
+
 	end
 	
 	assign ReadData1 = reg_mem[read_reg1];
