@@ -3,6 +3,7 @@
 `define ADD 2'b10
 `define SUB 2'b11
 `timescale 1ns/1ns
+
 module ALU(Operand1, Operand2, ALUControl, ALUResult, Zero);
     
     input [31:0] Operand1;
@@ -12,7 +13,7 @@ module ALU(Operand1, Operand2, ALUControl, ALUResult, Zero);
     output reg [31:0] ALUResult;
     output reg Zero;
     
-    always @ (Operand1 or Operand2 or ALUControl)
+    always @ (*)
     begin
       Zero = 0;
        case (ALUControl)

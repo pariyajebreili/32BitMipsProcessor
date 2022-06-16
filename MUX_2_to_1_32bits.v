@@ -5,7 +5,7 @@ module mux_2_to_1_32bits (Input0, Input1, Selector, Output1);
     
     output reg [31:0] Output1;
     
-    always @(Input0 or Input1 or Selector)
+    always @(*)
     begin
         Output1 = (Selector == 1'b0) ? Input0 : Input1;
     end
