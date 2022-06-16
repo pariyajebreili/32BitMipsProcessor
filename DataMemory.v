@@ -1,3 +1,4 @@
+`timescale 1ns/1ns
 module  DataMemory (Address, rbar_w, WriteData, ReadData);
    
    // rbar_w: control signal - Not Read Or Write

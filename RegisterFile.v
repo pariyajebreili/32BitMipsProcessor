@@ -1,3 +1,4 @@
+`timescale 1ns/1ns
 module RegisterFile(ReadRegister1, ReadRegister2, WriteData, WriteReg,RegWriteActive, ReadData1, ReadData2);
 
     // WriteData: the data to write

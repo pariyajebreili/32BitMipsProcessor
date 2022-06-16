@@ -1,3 +1,4 @@
+`timescale 1ns/1ns
 module SignExtend(Input1, Output1);
    
    input [15:0] Input1;

@@ -1,3 +1,4 @@
+`timescale 1ns/1ns
 module ProgramCounter(clk, rst, PcIn, PcNext);
 
 	input clk, rst;
