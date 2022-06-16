@@ -1,19 +1,3 @@
-`include "ALU.v"
-`include "ALUControlUnit.v"
-`include "ControlUnit.v"
-`include "DataMemory.v"
-`include "InstructionMemory.v"
-`include "MuxAfterALU.v"
-`include "MuxAfterMemory.v"
-`include "MuxAfterRegister.v"
-`include "MuxBeforRegister.v"
-`include "PCAdder.v"
-`include "JCall.v"
-`include "ProgramCounter.v"
-`include "RegisterFile.v"
-`include "ShiftLeftTwoBit.v"
-`include "SignExtend.v"
-
 module MipsCPU(clk, rst, pc_in,pc_next,inst,write_reg,read_data1, read_data2,alu_crtl,zero,read_data,write_data_reg);	
 	
 	input clk,rst;
@@ -53,3 +37,172 @@ module MipsCPU(clk, rst, pc_in,pc_next,inst,write_reg,read_data1, read_data2,alu
 	JCall JUPM(pc_out_alu,read_data1,j,pc_in);
 
 endmodule
+
+module alu (alu_crtl, A, B, alu_out, zero);
+	input [3:0] alu_crtl;
+	input [31:0] A,B;
+	output zero;
+	output reg [31:0] alu_out;
+   
+	assign zero   = (alu_out == 0);
+	// assign n_zero = (alu_out != 0);
+
+	always @(alu_crtl, A, B) begin
+		case (alu_crtl)
+			0: alu_out = A & B;
+			1: alu_out = A | B;
+			2: alu_out = A + B;
+			3: alu_out = A - B;
+			
+			default: alu_out = 0;
+		endcase
+	end
+endmodule
+
+
+module alu_control_unit (alu_op, func, alu_crtl);
+  
+	input      [3:0]  alu_op;
+	input      [5:0]  func;
+	output reg [3:0]  alu_crtl;
+	wire       [5:0]  AND   = 6'b100100, OR  = 6'b100101, ADD  = 6'b100000, SUB = 6'b100010; 
+
+
+	always @(alu_op, func) begin
+	if      (alu_op == 0) begin alu_crtl <= 2;      end   //LW and SW use add
+	else if (alu_op == 1) begin alu_crtl <= 3;      end   // branch use subtract
+	else if (alu_op == 2) begin alu_crtl <= 2;      end   //add
+	else if (alu_op == 3) begin alu_crtl <= 3;      end   //sub
+	else if (alu_op == 4) begin alu_crtl <= 0;      end   //and
+	else if (alu_op == 5) begin alu_crtl <= 1;      end   //or
+	else
+		case(func)
+			AND: 		alu_crtl  <= 0; 	
+			OR : 		alu_crtl  <= 1; 	
+			ADD: 		alu_crtl  <= 2; 
+			SUB: 		alu_crtl  <= 3; 
+		endcase
+	end
+endmodule
+
+
+module control_unit(opcode,reg_dst,reg_write, alu_src,mem_toreg, mem_read, mem_write,branch,branch_ne,j,alu_op);
+	
+	input [5:0] opcode;
+	output reg reg_dst,reg_write, alu_src,j,mem_toreg, mem_read, mem_write,branch,branch_ne;
+	output reg [3:0] alu_op;
+ 
+   wire [5:0] LW = 6'b100011/*35*/, SW  = 6'b101011/*43*/, ADDI = 6'b001000/*8*/,
+              SUBI  = 6'b100111/*42*/, ANDI  = 6'b101111/*50*/, ORI  = 6'b110010/*8*/,
+	 	  BEQ   = 6'b000100/*4*/, J = 6'b000010/*2*/,RTYPE = 6'b000000/*0*/;
+				  
+	
+	always @(*) begin
+		//reset...
+		reg_dst 		<= 0;
+		alu_src 		<= 0;
+		mem_toreg	<= 0;
+		reg_write	<= 0;
+		mem_read		<= 0;
+		mem_write	<= 0;
+		branch		<= 0;
+		j		      <= 0;
+
+		//select oprand
+		case(opcode)	
+			LW: begin
+				alu_src 		<= 1;
+				reg_write	<= 1;
+				mem_read		<= 1;
+				mem_write	<= 1;
+				alu_op		<= 4'b0000;/*0*/
+			end
+			SW: begin
+				alu_src 		<= 1;
+				mem_write	<= 1;
+				alu_op		<= 4'b0000;/*0*/
+			end
+			BEQ: begin
+				branch		<= 1;
+				alu_op		<= 4'b0001;/*1*/
+			end
+			ADDI: begin
+				alu_src 		<= 1;
+				reg_write	<= 1;
+				alu_op		<= 4'b0010;/*2*/
+			end
+			SUBI: begin
+				alu_src 		<= 1;
+				reg_write	<= 1;
+				alu_op		<= 4'b0011;/*3*/
+			end
+			ANDI: begin
+				alu_src 		<= 1;
+				reg_write	<= 1;
+				alu_op		<= 4'b0101;/*5*/
+			end
+			ORI: begin
+				alu_src 		<= 1;
+				reg_write	<= 1;
+				alu_op		<= 4'b0111;/*7*/
+			end
+			J: begin
+				j              <= 1;
+				// alu_op			<= 4'bxxxx;
+			end
+			RTYPE: begin
+				reg_dst 		<= 1;
+				reg_write		<= 1;
+				alu_op		<= 4'b1111;
+			end
+		endcase
+	end
+endmodule
+
+
+module intruction_memory(clk, address, inst);
+
+	input clk;
+	input [31:0] address;
+	output reg [31:0]	inst;
+	reg [31:0] IMEM [0:127];
+	
+	initial begin
+		//r-tpe  -> rd,rs,rt
+		IMEM[1]= 32'b000000_00100_00001_00100_00000_100000;//add $mul,$mul,$a;
+            IMEM[2] = 32'b10001100001001010000000000000011;// lw $5, 3($1 = 4)
+		IMEM[3]= 32'b000000_00101_00011_00100_00000_101011;//add 
+		IMEM[4]= 32'b000100_00111_00111_0000000000000111; //beq $t0,$0,EXIT [jump 3 => line 10]
+	end
+
+	always @( posedge clk) inst <= IMEM[address[31:2]];
+endmodule
+
+
+module JCall(pc_out_alu,read_data1,j,pc_in);
+	input [31:0] pc_out_alu, read_data1;
+	input j;	
+	
+	output reg [31:0] pc_in;
+	
+	always @(*) begin
+		if   (j) begin pc_in <= read_data1; end
+		else     begin pc_in <= pc_out_alu;     end
+	end
+endmodule
+
+
+module mux_after_alu (pc_next, add_alu_out, branch_zero_and, pc_in);
+	input [31:0] pc_next, add_alu_out;
+	input branch_zero_and;	
+	
+	output reg [31:0] pc_in;
+	
+	initial pc_in <= 0;
+
+	always @(*) begin
+		if(branch_zero_and) begin pc_in <= add_alu_out; end 
+		else begin  pc_in <= pc_next ; end
+	end
+endmodule
+
