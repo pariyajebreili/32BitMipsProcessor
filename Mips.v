@@ -1,54 +1,54 @@
-module MipsCPU(clk, rst, pc_in,pc_next,inst,write_reg,read_data1, read_data2,alu_crtl,zero,read_data,write_data_reg);	
+module MipsCPU(CLK, rst, PCIn,PCNext,Instruction,write_reg,ReadData1, ReadData2,ALUControl,Zero,read_data,write_data_reg);	
 	
-	input clk,rst;
-	output wire zero;
+	input CLK,rst;
+	output wire Zero;
       output wire [4:0] write_reg;
-	output wire [3:0] alu_crtl;
-	output wire [31:0] pc_next,pc_in,inst,read_data1, read_data2,write_data_reg,read_data;
+	output wire [3:0] ALUControl;
+	output wire [31:0] PCNext,PCIn,Instruction,ReadData1, ReadData2,write_data_reg,read_data;
 	
-	wire reg_dst, reg_write, mem_toreg,ALUCtl, mem_read, mem_write, branch,branch_ne, j,branch_zero_and,bne_nzero_and,branching;
+	wire reg_dst, reg_write, mem_toreg,ALUCtl, mem_read, mem_write, branch,branch_ne, j,branch_Zero_and,bne_nZero_and,branching;
 	wire [3:0] alu_op;
 	wire [31:0] add_alu_out,pc_out_alu,alu_out,shift_out,alu_b,extend32;
 
 	//Orginal Unit
-	prgram_counter PC(clk,rst,pc_in,pc_next);
-	intruction_memory IM(clk,pc_in,inst);
-	reg_file RF(clk,reg_write,inst[25:21],inst[20:16],write_reg,write_data_reg,read_data1,read_data2);
-	data_memory  DM(clk,alu_out,mem_write,mem_read,read_data2,read_data);
+	prgram_counter PC(CLK,rst,PCIn,PCNext);
+	intruction_memory IM(CLK,PCIn,Instruction);
+	reg_file RF(CLK,reg_write,Instruction[25:21],Instruction[20:16],write_reg,write_data_reg,ReadData1,ReadData2);
+	data_memory  DM(CLK,alu_out,mem_write,mem_read,ReadData2,read_data);
 
 	//Control Unit
-	control_unit CONTROL(inst[31:26],reg_dst,reg_write,alu_src,mem_toreg,mem_read,mem_write,branch,branch_ne,j,alu_op);
-	alu_control_unit ALUCTRL(alu_op,inst[5:0],alu_crtl);
+	control_unit CONTROL(Instruction[31:26],reg_dst,reg_write,alu_src,mem_toreg,mem_read,mem_write,branch,branch_ne,j,alu_op);
+	alu_control_unit ALUCTRL(alu_op,Instruction[5:0],ALUControl);
 
 	//Contivites Unit
-	mux_before_regfile BEF_RF(inst[20:16],inst[15:11],reg_dst,write_reg);
-	mux_affter_regfile AFT_RF(alu_src,read_data2,extend32,alu_b);
-	sign_extend SE16TO32(inst[15:0],extend32);
+	mux_before_regfile BEF_RF(Instruction[20:16],Instruction[15:11],reg_dst,write_reg);
+	mux_affter_regfile AFT_RF(alu_src,ReadData2,extend32,alu_b);
+	sign_extend SE16TO32(Instruction[15:0],extend32);
 	shift_left_2bit ADD_ALU_B(extend32,shift_out);	
-	alu ADDRESS(alu_crtl,read_data1,alu_b,alu_out,zero);
-	pc_adder PCADDER(pc_next,shift_out,add_alu_out);	
+	alu ADDRESS(ALUControl,ReadData1,alu_b,alu_out,Zero);
+	pc_adder PCADDER(PCNext,shift_out,add_alu_out);	
 	
-	and(branch_zero_and,branch,zero);
-	and(bne_zero_and,branch_ne,~zero);
-	or(branching,branch_zero_and,bne_zero_and);
+	and(branch_Zero_and,branch,Zero);
+	and(bne_Zero_and,branch_ne,~Zero);
+	or(branching,branch_Zero_and,bne_Zero_and);
 
-	mux_after_alu mux4_0(pc_next,add_alu_out,branching,pc_out_alu);
+	mux_after_alu mux4_0(PCNext,add_alu_out,branching,pc_out_alu);
 	mux_affter_memory mu3_0(read_data,alu_out,mem_toreg,write_data_reg);
-	JCall JUPM(pc_out_alu,read_data1,j,pc_in);
+	JCall JUPM(pc_out_alu,ReadData1,j,PCIn);
 
 endmodule
 
-module alu (alu_crtl, A, B, alu_out, zero);
-	input [3:0] alu_crtl;
+module alu (ALUControl, A, B, alu_out, Zero);
+	input [3:0] ALUControl;
 	input [31:0] A,B;
-	output zero;
+	output Zero;
 	output reg [31:0] alu_out;
    
-	assign zero   = (alu_out == 0);
-	// assign n_zero = (alu_out != 0);
+	assign Zero   = (alu_out == 0);
+	// assign n_Zero = (alu_out != 0);
 
-	always @(alu_crtl, A, B) begin
-		case (alu_crtl)
+	always @(ALUControl, A, B) begin
+		case (ALUControl)
 			0: alu_out = A & B;
 			1: alu_out = A | B;
 			2: alu_out = A + B;
@@ -60,27 +60,27 @@ module alu (alu_crtl, A, B, alu_out, zero);
 endmodule
 
 
-module alu_control_unit (alu_op, func, alu_crtl);
+module alu_control_unit (alu_op, func, ALUControl);
   
 	input      [3:0]  alu_op;
 	input      [5:0]  func;
-	output reg [3:0]  alu_crtl;
+	output reg [3:0]  ALUControl;
 	wire       [5:0]  AND   = 6'b100100, OR  = 6'b100101, ADD  = 6'b100000, SUB = 6'b100010; 
 
 
 	always @(alu_op, func) begin
-	if      (alu_op == 0) begin alu_crtl <= 2;      end   //LW and SW use add
-	else if (alu_op == 1) begin alu_crtl <= 3;      end   // branch use subtract
-	else if (alu_op == 2) begin alu_crtl <= 2;      end   //add
-	else if (alu_op == 3) begin alu_crtl <= 3;      end   //sub
-	else if (alu_op == 4) begin alu_crtl <= 0;      end   //and
-	else if (alu_op == 5) begin alu_crtl <= 1;      end   //or
+	if      (alu_op == 0) begin ALUControl <= 2;      end   //LW and SW use add
+	else if (alu_op == 1) begin ALUControl <= 3;      end   // branch use subtract
+	else if (alu_op == 2) begin ALUControl <= 2;      end   //add
+	else if (alu_op == 3) begin ALUControl <= 3;      end   //sub
+	else if (alu_op == 4) begin ALUControl <= 0;      end   //and
+	else if (alu_op == 5) begin ALUControl <= 1;      end   //or
 	else
 		case(func)
-			AND: 		alu_crtl  <= 0; 	
-			OR : 		alu_crtl  <= 1; 	
-			ADD: 		alu_crtl  <= 2; 
-			SUB: 		alu_crtl  <= 3; 
+			AND: 		ALUControl  <= 0; 	
+			OR : 		ALUControl  <= 1; 	
+			ADD: 		ALUControl  <= 2; 
+			SUB: 		ALUControl  <= 3; 
 		endcase
 	end
 endmodule
@@ -160,9 +160,9 @@ module control_unit(opcode,reg_dst,reg_write, alu_src,mem_toreg, mem_read, mem_w
 endmodule
 
 
-module  data_memory (clk, addr,mem_write, mem_read,write_data,read_data);
+module  data_memory (CLK, addr,mem_write, mem_read,write_data,read_data);
 
-	input wire clk,mem_write, mem_read;
+	input wire CLK,mem_write, mem_read;
 	input wire [31:0] addr,write_data;
 	output reg [31:0] read_data;
 
@@ -177,7 +177,7 @@ module  data_memory (clk, addr,mem_write, mem_read,write_data,read_data);
 		end
    end
 
-   always @(posedge clk) begin
+   always @(posedge CLK) begin
 		if (mem_write == 1) begin
 			Mem[addr] <= write_data;
 		end
@@ -188,11 +188,11 @@ module  data_memory (clk, addr,mem_write, mem_read,write_data,read_data);
 
 endmodule
 
-module intruction_memory(clk, address, inst);
+module intruction_memory(CLK, address, Instruction);
 
-	input clk;
+	input CLK;
 	input [31:0] address;
-	output reg [31:0]	inst;
+	output reg [31:0]	Instruction;
 	reg [31:0] IMEM [0:127];
 	
 	initial begin
@@ -203,34 +203,34 @@ module intruction_memory(clk, address, inst);
 		IMEM[4]= 32'b000100_00111_00111_0000000000000111; //beq $t0,$0,EXIT [jump 3 => line 10]
 	end
 
-	always @( posedge clk) inst <= IMEM[address[31:2]];
+	always @( posedge CLK) Instruction <= IMEM[address[31:2]];
 endmodule
 
 
-module JCall(pc_out_alu,read_data1,j,pc_in);
-	input [31:0] pc_out_alu, read_data1;
+module JCall(pc_out_alu,ReadData1,j,PCIn);
+	input [31:0] pc_out_alu, ReadData1;
 	input j;	
 	
-	output reg [31:0] pc_in;
+	output reg [31:0] PCIn;
 	
 	always @(*) begin
-		if   (j) begin pc_in <= read_data1; end
-		else     begin pc_in <= pc_out_alu;     end
+		if   (j) begin PCIn <= ReadData1; end
+		else     begin PCIn <= pc_out_alu;     end
 	end
 endmodule
 
 
-module mux_after_alu (pc_next, add_alu_out, branch_zero_and, pc_in);
-	input [31:0] pc_next, add_alu_out;
-	input branch_zero_and;	
+module mux_after_alu (PCNext, add_alu_out, branch_Zero_and, PCIn);
+	input [31:0] PCNext, add_alu_out;
+	input branch_Zero_and;	
 	
-	output reg [31:0] pc_in;
+	output reg [31:0] PCIn;
 	
-	initial pc_in <= 0;
+	initial PCIn <= 0;
 
 	always @(*) begin
-		if(branch_zero_and) begin pc_in <= add_alu_out; end 
-		else begin  pc_in <= pc_next ; end
+		if(branch_Zero_and) begin PCIn <= add_alu_out; end 
+		else begin  PCIn <= PCNext ; end
 	end
 endmodule
 
@@ -251,16 +251,16 @@ module mux_affter_memory (read_data, alu_out, mem_toreg, write_data_reg);
 endmodule
 
 
-module mux_affter_regfile (alu_src, read_data2, extend32, alu_b);
+module mux_affter_regfile (alu_src, ReadData2, extend32, alu_b);
 
 	input alu_src;
-	input [31:0] read_data2,extend32;	
+	input [31:0] ReadData2,extend32;	
 	
 	output reg [31:0] alu_b;
 	
-	always @(alu_src, read_data2, extend32) begin
+	always @(alu_src, ReadData2, extend32) begin
 		case (alu_src)
-			0: alu_b <= read_data2 ;
+			0: alu_b <= ReadData2 ;
 			1: alu_b <= extend32;
 		endcase
 	end
@@ -281,42 +281,42 @@ module mux_before_regfile(rt, rd, reg_dst, write_reg);
 
 endmodule
 
-module pc_adder(pc_next, shift_out, add_alu_out);
+module pc_adder(PCNext, shift_out, add_alu_out);
 
-	input [31:0] pc_next;
+	input [31:0] PCNext;
 	input [31:0] shift_out;
 	
 	output reg [31:0] add_alu_out;
 
 	always @(*) begin
-		add_alu_out <= pc_next + shift_out;
+		add_alu_out <= PCNext + shift_out;
 	end
 endmodule
 
-module prgram_counter(clk, rst, pc_in, pc_next);
+module prgram_counter(CLK, rst, PCIn, PCNext);
 
-	input clk, rst;
-	input [31:0] pc_in;
+	input CLK, rst;
+	input [31:0] PCIn;
 	
-	output reg [31:0] pc_next;
+	output reg [31:0] PCNext;
 	
-	always @(posedge clk) begin
+	always @(posedge CLK) begin
 		if (rst == 1) 
-		    pc_next <= 0;
+		    PCNext <= 0;
 		else 
-		    pc_next <= pc_in + 4; 
+		    PCNext <= PCIn + 4; 
 	end
 	
 endmodule
 
-module reg_file(clk, reg_write, read_reg1, read_reg2, write_reg, write_data, read_data1, read_data2);
+module reg_file(CLK, reg_write, read_reg1, read_reg2, write_reg, write_data, ReadData1, ReadData2);
 
-	input clk;
+	input CLK;
 	input reg_write;
 	input [4:0] read_reg1, read_reg2, write_reg;
 	input [31:0] write_data;
 		
-	output [31:0] read_data1, read_data2;
+	output [31:0] ReadData1, ReadData2;
 	
 	reg [31:0] reg_mem [0:31];
 
@@ -336,10 +336,10 @@ module reg_file(clk, reg_write, read_reg1, read_reg2, write_reg, write_data, rea
 		reg_mem[31] <=16;//lable Exit
 	end
 	
-	assign read_data1 = reg_mem[read_reg1];
-	assign read_data2 = reg_mem[read_reg2];
+	assign ReadData1 = reg_mem[read_reg1];
+	assign ReadData2 = reg_mem[read_reg2];
 	
-	always @(posedge clk) begin
+	always @(posedge CLK) begin
 		if (reg_write == 1)
 			reg_mem[write_reg] = write_data;
 	end	

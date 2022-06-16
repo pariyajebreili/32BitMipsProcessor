@@ -2,34 +2,29 @@
 `timescale 1ns/1ns
 
 module tb_mips();
-  	reg         clk,rst;
-	wire        zero;
-   wire [4:0]  write_reg;
-   wire [3:0]  alu_crtl;
-	wire [31:0] pc_next,
-					pc_in,
-					inst,
-					read_data1,
-					read_data2,
-					write_data_reg,
-					read_data;
+  	reg CLK,rst;
    integer i;
+	wire Zero;
+   wire [4:0]  write_reg;
+   wire [3:0]  ALUControl;
+	wire [31:0] PCNext,PCIn,Instruction,ReadData1,ReadData2,write_data_reg,read_data;
+   
 
    initial
         begin
         rst=1;
-        clk=0;
-        clk=1;
+        CLK=0;
+        CLK=1;
         #50;
         rst=0;
         for(i=0;i<20;i=i+1)
         begin
-            clk=~clk;
+            CLK=~CLK;
             #50;
         end
    end
 	   
-	MipsCPU mcpu(clk, rst, pc_in,pc_next,inst,write_reg,read_data1, read_data2,alu_crtl,zero,read_data,write_data_reg);
+	MipsCPU mcpu(CLK, rst, PCIn,PCNext,Instruction,write_reg,ReadData1, ReadData2,ALUControl,Zero,read_data,write_data_reg);
 
       initial begin
 
