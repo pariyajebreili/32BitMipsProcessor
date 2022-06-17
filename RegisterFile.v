@@ -37,6 +37,7 @@ module RegisterFile(rst, ReadRegister1, ReadRegister2, WriteData, WriteReg,RegWr
     end
 
 
+
     // initial begin
     //     RegFile[0] = 32'b00000000000000000000000000000000; // 0
     //     RegFile[1] = 32'b00000000000000000000000000000100; // 4

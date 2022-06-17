@@ -16,12 +16,13 @@ module Mips(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDa
 
       wire branch_zero_and;
       // wire [31:0] MemReadData;
+      wire [31:0] pc_out;
 
 
 
 
 
-	ProgramCounter PC(.clk(clk), .rst(rst), .PcIn(pc_in), .PcNext(pc_in));
+	ProgramCounter PC(.clk(clk), .rst(rst), .PcIn(pc_in), .new_pc(AddAluOut), .branch_zero_and(branch_zero_and), .PcNext(pc_in));
    
 
 
@@ -30,12 +31,11 @@ module Mips(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDa
 
 
       and(branch_zero_and, branch, Zero);
-      /* changed PCNext to pc_in.... */
+
 	PcAdder PCADDER(.PcNext(pc_in), .ShiftOut(extend32),.AddAluOut(AddAluOut));
-      /* changed PCNext to pc_in.... */
-      /* why we can't change output to pc_in? */
-	mux_2_to_1_32bits mux_after_pc_adder(.Input0(pc_in), .Input1(AddAluOut),
-       .Selector(branch_zero_and), .Output1(PCNext));
+
+	// mux_2_to_1_32bits mux_after_pc_adder(.Input0(PCNext), .Input1(AddAluOut),
+      //  .Selector(branch_zero_and), .Output1(PCNext));
 
 
       /* pc_in or PCNext? obviously pc_in but why it's not working.................. */

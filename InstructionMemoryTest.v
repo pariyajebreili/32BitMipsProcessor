@@ -15,5 +15,12 @@ module InstructionMemoryTest();
         
         #20
         Address = 32'b00000000000000000000000000000111;
+        
+        #20
+        Address = 32'b00000000000000000000000000000011;
+        
+        
+        #20
+        Address = 32'b00000000000000000000000000000100;        
     end
 endmodule
