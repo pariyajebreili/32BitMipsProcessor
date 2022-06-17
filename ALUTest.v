@@ -14,6 +14,17 @@ module ALUTest();
     
     initial
     begin
+      /*
+       Operand1 = 32'b00000000000000000000000001010101; // 85
+       Operand2 = 32'b00000000000000000000000001010101; // 85
+       ALUControl = 4'b10;
+       
+       #20
+       Operand1 = 32'b00000000000000000000000001010101; // 85
+       Operand2 = 32'b00000000000000000000000001010101; // 85
+       ALUControl = 4'b11;      
+       */ 
+        /*
        Operand1 = 32'b00000000000000000000000001010101; // 85
        Operand2 = 32'b00000000000000000100000010101010; // 16554
        ALUControl = 4'b00;
@@ -41,6 +52,15 @@ module ALUTest();
        #20
        ALUControl = 4'b11;
        
+       */
+       
+              
+       Operand1 = 32'b00000000000000000000000000000000; 
+       Operand2 = 32'b00000000000000000000000000000001; 
+       ALUControl = 4'b11;
+       
+       #20;
+       
     end
 
       initial begin
@@ -51,3 +71,4 @@ module ALUTest();
       end
     
 endmodule
+

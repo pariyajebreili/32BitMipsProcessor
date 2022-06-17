@@ -1,3 +1,4 @@
+`timescale 1ns/1ns
 module  DataMemory (Address, rbar_w, WriteData, ReadData);
    
    // rbar_w: control signal - Not Read Or Write
@@ -13,7 +14,6 @@ module  DataMemory (Address, rbar_w, WriteData, ReadData);
 	integer i;
 
 	initial begin
-			ReadData <= 0;
 			for (i = 0; i < 256; i = i + 1) begin
 				Mem[i] = i;
 			end

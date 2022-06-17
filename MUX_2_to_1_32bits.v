@@ -1,3 +1,4 @@
+`timescale 1ns/1ns
 module mux_2_to_1_32bits (Input0, Input1, Selector, Output1);
     input [31:0] Input0, Input1;
     input Selector;
