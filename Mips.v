@@ -14,9 +14,9 @@ module Mips(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDa
 	output wire [1:0] ALUOperation;
 	wire [31:0] AddAluOut,ShiftOut,extend32;
 
-      wire branch_zero_and;
+   wire branch_zero_and;
       // wire [31:0] MemReadData;
-      wire [31:0] pc_out;
+   wire [31:0] pc_out;
 
 
 
@@ -45,7 +45,7 @@ module Mips(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDa
 	mux_2_to_1_5bits mux_before_regfile(.Input0(Instruction[20:16]), .Input1(Instruction[15:11]),
        .Selector(RegDst), .Output1(WriteReg));
 
-      RegisterFile RF(.rst(rst), .ReadRegister1(Instruction[25:21]), .ReadRegister2(Instruction[20:16]),
+      RegisterFile RF(.clk(clk), .rst(rst), .ReadRegister1(Instruction[25:21]), .ReadRegister2(Instruction[20:16]),
       .WriteData(WriteDataReg), .WriteReg(WriteReg),
       .RegWriteActive(RegWrite), .ReadData1(ReadData1), .ReadData2(ReadData2));
 

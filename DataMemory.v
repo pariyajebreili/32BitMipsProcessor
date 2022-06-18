@@ -19,7 +19,7 @@ module  DataMemory (Address, rbar_w, WriteData, ReadData);
 			end
 	end
 
-	always @(Address or rbar_w) 
+	always @(*) 
 	begin
 	      if(rbar_w == 1)
 	      begin

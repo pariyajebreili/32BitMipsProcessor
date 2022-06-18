@@ -1,10 +1,10 @@
 `timescale 1ns/1ns
-module RegisterFile(rst, ReadRegister1, ReadRegister2, WriteData, WriteReg,RegWriteActive, ReadData1, ReadData2);
+module RegisterFile(clk, rst, ReadRegister1, ReadRegister2, WriteData, WriteReg,RegWriteActive, ReadData1, ReadData2);
 
     // WriteData: the data to write
     // WriteReg: number of register to write
     // RegWriteActive: control signal for writing register => 1: write - 0: not write
-    input rst;
+    input rst, clk;
     input [4:0] ReadRegister1;
     input [4:0] ReadRegister2;
     input [31:0] WriteData;
@@ -24,7 +24,7 @@ module RegisterFile(rst, ReadRegister1, ReadRegister2, WriteData, WriteReg,RegWr
      assign ReadData2 = (ReadRegister2 == 5'b00000)? 32'h00000000: RegFile[ReadRegister2];
 
 
-    always @ (*)
+    always @ (posedge clk)
     begin
         if (rst)
 			for (i = 1; i < 32; i = i + 1)
