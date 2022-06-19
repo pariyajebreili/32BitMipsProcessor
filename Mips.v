@@ -1,12 +1,12 @@
 `timescale 1ns/1ns
-module Mips(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDataReg,
+module Mips(clk, rst, pc_in ,Instruction, ReadData1, ReadData2,  WriteDataReg,
       WriteReg, Zero, branch, RegDst, RegWrite, MemToReg, ALUSrc, MemRead, MemWrite, ALUOperation, MemReadData, alu_out, alu_b);
 	
 	input clk,rst;
 	
       output wire [4:0] WriteReg;
 	output wire [31:0] Instruction,ReadData1, ReadData2,WriteDataReg, alu_out, MemReadData;
-	output wire [31:0] pc_in, PCNext, alu_b;
+	output wire [31:0] pc_in, alu_b;
 	
 	
 	output wire RegDst, RegWrite, MemToReg,ALUSrc,
@@ -14,14 +14,12 @@ module Mips(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDa
 	output wire [1:0] ALUOperation;
 	wire [31:0] AddAluOut,ShiftOut,extend32;
 
-   wire branch_zero_and;
-      // wire [31:0] MemReadData;
-   wire [31:0] pc_out;
+      wire branch_zero_and;
 
 
 
 
-
+      and(branch_zero_and, branch, Zero);
 	ProgramCounter PC(.clk(clk), .rst(rst), .PcIn(pc_in), .new_pc(AddAluOut), .branch_zero_and(branch_zero_and), .PcNext(pc_in));
    
 
@@ -30,15 +28,10 @@ module Mips(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDa
 	SignExtend SE16TO32(Instruction[15:0],extend32);
 
 
-      and(branch_zero_and, branch, Zero);
 
 	PcAdder PCADDER(.PcNext(pc_in), .ShiftOut(extend32),.AddAluOut(AddAluOut));
 
-	// mux_2_to_1_32bits mux_after_pc_adder(.Input0(PCNext), .Input1(AddAluOut),
-      //  .Selector(branch_zero_and), .Output1(PCNext));
 
-
-      /* pc_in or PCNext? obviously pc_in but why it's not working.................. */
 	IntructionMemory IM(.Address(pc_in), .Instruction(Instruction));
 
       
@@ -76,11 +69,11 @@ module testbech();
       wire ALUSrc,Zero;
       wire [4:0] WriteReg;
       wire [1:0] ALUOperation;
-      wire [31:0] Instruction,alu_b, pc_in, PCNext, ReadData1, ReadData2, WriteDataReg, MemReadData, alu_out;
+      wire [31:0] Instruction,alu_b, pc_in, ReadData1, ReadData2, WriteDataReg, MemReadData, alu_out;
  
       integer i;
    
-      Mips MIPS(clk, rst, pc_in, PCNext ,Instruction, ReadData1, ReadData2,  WriteDataReg,
+      Mips MIPS(clk, rst, pc_in, Instruction, ReadData1, ReadData2,  WriteDataReg,
       WriteReg, Zero, branch, RegDst, RegWrite, MemToReg, ALUSrc, MemRead, MemWrite, ALUOperation, MemReadData, alu_out, alu_b);
       
  

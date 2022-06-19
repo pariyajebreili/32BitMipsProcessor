@@ -8,6 +8,7 @@ module ProgramCounter(clk, rst, PcIn, new_pc, branch_zero_and,PcNext);
 	
 	always @(posedge clk) 
       begin
+		// Mux after pc adder operations covered in here
 		if (rst == 1) 
 		    PcNext = 0;
 		else if (branch_zero_and) 
