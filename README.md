@@ -1,4 +1,10 @@
 # 32_Bit_MIPS_Processor
+MIPS is a type of computer processor design (an instruction set architecture) that tells a CPU how to run instructions.
+<br>
+
+The MIPS (Microprocessor without Interlocked Pipeline Stages) architecture is widely used in education and research for its simplicity and modularity. 
+
+<br>
 
 <img src="https://user-images.githubusercontent.com/87968419/175491403-af7fb129-df12-4837-b392-2204e70af8c2.jpg" width="650">
 
